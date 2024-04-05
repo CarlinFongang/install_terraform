@@ -1,0 +1,28 @@
+---
+# roles/install_terraform/tasks/main.yml
+- name: Download Terraform
+  ansible.builtin.get_url:
+    url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_{{ terraform_architecture }}.zip"
+    dest: "/tmp/terraform_{{ terraform_version }}_{{ terraform_architecture }}"
+  become: true
+
+- name: Unzip Terraform
+  ansible.builtin.unarchive:
+    src: "/tmp/terraform_{{ terraform_version }}_{{ terraform_architecture }}"
+    dest: "/usr/local/bin"
+    remote_src: yes
+    #extra_opts: [--strip-components=1]
+    creates: "/usr/local/bin/terraform"
+  become: true
+
+- name: Verify Terraform installation
+  ansible.builtin.command: terraform version
+  register: terraform_version
+ # failed_when: terraform_version_output.rc != 0
+  changed_when: false
+
+- name: Show Terraform version
+  debug:
+      msg: "Terraform version installed: {{ terraform_version.stdout }}"
+#  ansible.builtin.debug:
+ #   var: terraform_version.stdout_lines
